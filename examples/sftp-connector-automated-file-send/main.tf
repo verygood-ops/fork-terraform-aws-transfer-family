@@ -241,6 +241,13 @@ resource "aws_iam_policy" "lambda_policy" {
           "transfer:DescribeExecution"
         ],
         Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "sqs:SendMessage"
+        ],
+        Resource = aws_sqs_queue.lambda_dlq.arn
       }
     ]
   })
@@ -272,6 +279,12 @@ resource "aws_lambda_code_signing_config" "lambda_code_signing" {
   description = "Code signing config for Lambda function"
 }
 
+resource "aws_sqs_queue" "lambda_dlq" {
+  name                      = "lambda-dlq-${random_pet.name.id}"
+  kms_master_key_id        = aws_kms_key.transfer_family_key.arn
+  message_retention_seconds = 1209600 # 14 days
+}
+
 resource "aws_lambda_function" "sftp_transfer" {
   function_name    = "s3-copy-${random_pet.name.id}"
   role             = aws_iam_role.lambda_role.arn
@@ -286,6 +299,10 @@ resource "aws_lambda_function" "sftp_transfer" {
 
   code_signing_config_arn = aws_lambda_code_signing_config.lambda_code_signing.arn
   kms_key_arn = aws_kms_key.transfer_family_key.arn
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
 
   tracing_config {
     mode = "Active"
