@@ -20,26 +20,23 @@ resource "random_pet" "name" {
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# Get KMS key from existing secret if provided
-data "aws_secretsmanager_secret" "existing" {
-  count = var.existing_secret_arn != null && var.existing_secret_arn != "" ? 1 : 0
-  arn   = var.existing_secret_arn
-}
-
-######################################
-# Locals
-######################################
-
 locals {
   connector_name = "retrieve-${random_pet.name.id}"
-  kms_key_arn = var.existing_secret_arn != null ? data.aws_secretsmanager_secret.existing[0].kms_key_id : aws_kms_key.transfer_family_key[0].arn
+  create_secret = var.existing_secret_arn == null
+  kms_key_arn = local.create_secret ? aws_kms_key.transfer_family_key[0].arn : data.aws_secretsmanager_secret.existing[0].kms_key_id
+}
+
+# Get KMS key from existing secret if provided
+data "aws_secretsmanager_secret" "existing" {
+  count = local.create_secret ? 0 : 1
+  arn   = var.existing_secret_arn
 }
 
 ###################################################################
 # KMS Key (only when not using existing secret)
 ###################################################################
 resource "aws_kms_key" "transfer_family_key" {
-  count = var.existing_secret_arn == null ? 1 : 0
+  count = local.create_secret ? 1 : 0
   
   description             = "KMS key for encrypting S3 bucket, DynamoDB, CloudWatch logs and connector credentials"
   deletion_window_in_days = 7
@@ -106,14 +103,14 @@ resource "aws_kms_key" "transfer_family_key" {
 }
 
 resource "aws_kms_alias" "transfer_family_key_alias" {
-  count = var.existing_secret_arn == null ? 1 : 0
+  count = local.create_secret ? 1 : 0
   
   name          = "alias/transfer-family-retrieve-key-${random_pet.name.id}"
   target_key_id = aws_kms_key.transfer_family_key[0].key_id
 }
 
 resource "aws_kms_key_policy" "transfer_family_key_policy" {
-  count = var.existing_secret_arn == null ? 1 : 0
+  count = local.create_secret ? 1 : 0
   
   key_id = aws_kms_key.transfer_family_key[0].id
   policy = aws_kms_key.transfer_family_key[0].policy
@@ -197,8 +194,8 @@ module "sftp_connector" {
 
   # Use existing secret
   user_secret_id   = var.existing_secret_arn
-  secret_name      = var.existing_secret_arn == null ? "sftp-credentials-${random_pet.name.id}" : null
-  secret_kms_key_id = var.existing_secret_arn == null ? aws_kms_key.transfer_family_key[0].arn : null
+  secret_name      = local.create_secret ? "sftp-credentials-${random_pet.name.id}" : null
+  secret_kms_key_id = local.create_secret ? aws_kms_key.transfer_family_key[0].arn : null
   sftp_username    = var.sftp_username
   sftp_private_key = var.sftp_private_key
   trusted_host_keys = var.trusted_host_keys
