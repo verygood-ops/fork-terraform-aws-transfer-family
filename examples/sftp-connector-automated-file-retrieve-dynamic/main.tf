@@ -190,7 +190,6 @@ module "sftp_connector" {
   connector_name = local.connector_name
   url            = var.sftp_server_endpoint
   s3_bucket_arn  = module.retrieve_s3_bucket.s3_bucket_arn
-  s3_bucket_name = module.retrieve_s3_bucket.s3_bucket_id
 
   # Use existing secret
   user_secret_id   = var.existing_secret_arn

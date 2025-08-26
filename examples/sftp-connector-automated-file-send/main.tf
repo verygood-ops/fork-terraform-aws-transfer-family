@@ -39,7 +39,6 @@ module "sftp_connector" {
   connector_name              = "sftp-connector-${random_pet.name.id}"
   url                         = var.sftp_server_endpoint
   s3_bucket_arn               = module.test_s3_bucket.s3_bucket_arn
-  s3_bucket_name              = module.test_s3_bucket.s3_bucket_id
   user_secret_id              = var.existing_secret_arn
   secret_name                 = var.existing_secret_arn == null ? "sftp-credentials-${random_pet.name.id}" : null
   sftp_username               = var.existing_secret_arn == null ? var.sftp_username : ""
