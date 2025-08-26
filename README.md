@@ -11,7 +11,7 @@ This module creates and configures AWS Transfer Family resources with the follow
 - **Transfer Connectors**: Automated file transfer to/from external SFTP servers
 - **Transfer Users**: User management with S3 bucket permissions and KMS access
 - Custom hostname support through AWS Route53 or other DNS providers (Optional)
-- CloudWatch logging configuration with customizable retention
+- CloudWatch logging configuration with a customizable retention
 
 ## Quick Start
 
