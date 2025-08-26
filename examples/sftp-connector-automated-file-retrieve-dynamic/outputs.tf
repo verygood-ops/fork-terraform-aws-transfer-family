@@ -57,3 +57,8 @@ output "sftp_credentials_secret_arn" {
   description = "ARN of the SFTP credentials secret"
   value       = var.existing_secret_arn
 }
+
+output "connector_static_ips" {
+  description = "Static IP addresses of the SFTP connector"
+  value       = module.sftp_connector.connector_static_ips
+}

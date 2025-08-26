@@ -47,3 +47,9 @@ output "dynamodb_table_arn" {
   description = "ARN of the DynamoDB table for file transfer tracking (if enabled)"
   value       = var.enable_dynamodb_tracking ? aws_dynamodb_table.file_transfer_tracking[0].arn : null
 }
+
+output "connector_static_ips" {
+  description = "Static IP addresses of the SFTP connector"
+  value       = module.sftp_connector.connector_static_ips
+}
+
