@@ -31,7 +31,7 @@ locals {
   # URL formatting
   sftp_url = startswith(var.url, "sftp://") ? var.url : "sftp://${var.url}"
 
-  create_secret = var.user_secret_id == null && length(var.trusted_host_keys) == 0
+  create_secret = var.user_secret_id == null
 }
 
 #####################################################################################

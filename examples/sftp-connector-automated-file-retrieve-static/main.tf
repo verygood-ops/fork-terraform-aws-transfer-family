@@ -156,8 +156,7 @@ module "sftp_connector" {
   s3_bucket_name    = module.retrieve_s3_bucket.s3_bucket_id
 
   # Use existing secret or create new one
-  user_secret_id                = var.existing_secret_arn
-  create_secret                   = var.existing_secret_arn == null
+  user_secret_id                  = var.existing_secret_arn
   secret_name                     = var.existing_secret_arn == null ? "sftp-credentials-${random_pet.name.id}" : null
   secret_kms_key_id               = var.existing_secret_arn == null ? aws_kms_key.transfer_family_key[0].arn : null
   sftp_username                   = var.sftp_username

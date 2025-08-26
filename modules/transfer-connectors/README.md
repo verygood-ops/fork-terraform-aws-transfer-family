@@ -58,7 +58,6 @@ No modules.
 | <a name="input_as2_mdn_signing_algorithm"></a> [as2\_mdn\_signing\_algorithm](#input\_as2\_mdn\_signing\_algorithm) | AS2 MDN signing algorithm for the connector | `string` | `"NONE"` | no |
 | <a name="input_as2_signing_algorithm"></a> [as2\_signing\_algorithm](#input\_as2\_signing\_algorithm) | AS2 signing algorithm for the connector | `string` | `"NONE"` | no |
 | <a name="input_connector_name"></a> [connector\_name](#input\_connector\_name) | Name of the AWS Transfer Family connector | `string` | `"sftp-connector"` | no |
-| <a name="input_create_secret"></a> [create\_secret](#input\_create\_secret) | Whether to create a new secret for SFTP credentials | `bool` | `false` | no |
 | <a name="input_logging_role"></a> [logging\_role](#input\_logging\_role) | IAM role ARN for CloudWatch logging (if not provided, a new role will be created) | `string` | `null` | no |
 | <a name="input_secret_kms_key_id"></a> [secret\_kms\_key\_id](#input\_secret\_kms\_key\_id) | KMS key ID for encrypting the secret | `string` | `null` | no |
 | <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name) | Name for the new secret (only used when create\_secret is true) | `string` | `null` | no |

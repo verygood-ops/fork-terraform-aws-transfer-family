@@ -53,5 +53,5 @@ output "connector_static_ips" {
 
 output "secret_arn" {
   description = "ARN of the created secret (if create_secret is true)"
-  value       = var.create_secret ? aws_secretsmanager_secret.sftp_credentials[0].arn : null
+  value       = local.create_secret ? aws_secretsmanager_secret.sftp_credentials[0].arn : null
 }
