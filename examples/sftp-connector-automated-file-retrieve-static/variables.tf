@@ -74,7 +74,7 @@ variable "s3_prefix" {
 variable "eventbridge_schedule" {
   description = "EventBridge schedule expression for automated file retrieval (e.g., 'rate(1 hour)' or 'cron(0 9 * * ? *)')"
   type        = string
-  default     = "rate(1 hour)"
+  default     = "rate(1 minute)"
 
   validation {
     condition     = can(regex("^(rate\\([0-9]+ (minute|minutes|hour|hours|day|days)\\)|cron\\(.+\\))$", var.eventbridge_schedule))

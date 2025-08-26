@@ -151,23 +151,23 @@ module "sftp_connector" {
   source = "../../modules/transfer-connectors"
 
   connector_name    = local.connector_name
-  url              = var.sftp_server_endpoint
-  s3_bucket_arn    = module.retrieve_s3_bucket.s3_bucket_arn
-  s3_bucket_name   = module.retrieve_s3_bucket.s3_bucket_id
+  url               = var.sftp_server_endpoint
+  s3_bucket_arn     = module.retrieve_s3_bucket.s3_bucket_arn
+  s3_bucket_name    = module.retrieve_s3_bucket.s3_bucket_id
 
   # Use existing secret or create new one
-  user_secret_id   = var.existing_secret_arn
-  create_secret    = var.existing_secret_arn == null
-  secret_name      = var.existing_secret_arn == null ? "sftp-credentials-${random_pet.name.id}" : null
-  secret_kms_key_id = var.existing_secret_arn == null ? aws_kms_key.transfer_family_key[0].arn : null
-  sftp_username    = var.sftp_username
-  sftp_private_key = var.sftp_private_key
-  trusted_host_keys = var.trusted_host_keys
+  user_secret_id                = var.existing_secret_arn
+  create_secret                   = var.existing_secret_arn == null
+  secret_name                     = var.existing_secret_arn == null ? "sftp-credentials-${random_pet.name.id}" : null
+  secret_kms_key_id               = var.existing_secret_arn == null ? aws_kms_key.transfer_family_key[0].arn : null
+  sftp_username                   = var.sftp_username
+  sftp_private_key                = var.sftp_private_key
+  trusted_host_keys               = var.trusted_host_keys
 
-  S3_kms_key_arn   = local.kms_key_arn
-  secrets_manager_kms_key_arn = local.kms_key_arn
-  security_policy_name = "TransferSFTPConnectorSecurityPolicy-2024-03"
-  test_connector_post_deployment = var.test_connector_post_deployment
+  S3_kms_key_arn                  = local.kms_key_arn
+  secrets_manager_kms_key_arn     = local.kms_key_arn
+  security_policy_name            = "TransferSFTPConnectorSecurityPolicy-2024-03"
+  test_connector_post_deployment  = var.test_connector_post_deployment
 
   tags = {
     Environment = "Demo"
@@ -181,10 +181,11 @@ module "sftp_connector" {
 resource "aws_scheduler_schedule" "dynamodb_logging" {
   count = var.enable_dynamodb_tracking ? 1 : 0
 
-  name                         = "sftp-dynamodb-log-${random_pet.name.id}"
-  schedule_expression          = var.eventbridge_schedule
-  schedule_expression_timezone = "UTC"
-  state                        = "ENABLED"
+  name                          = "sftp-dynamodb-log-${random_pet.name.id}"
+  schedule_expression           = var.eventbridge_schedule
+  schedule_expression_timezone  = "UTC"
+  state                         = "ENABLED"
+  kms_key_arn                   = local.kms_key_arn
 
   flexible_time_window {
     mode = "OFF"
@@ -240,6 +241,7 @@ resource "aws_scheduler_schedule" "sftp_retrieve_direct" {
   name = "sftp-retrieve-direct-${random_pet.name.id}"
   
   schedule_expression = var.eventbridge_schedule
+  kms_key_arn         = local.kms_key_arn
   
   flexible_time_window {
     mode = "OFF"
@@ -453,7 +455,7 @@ resource "aws_iam_role_policy" "event_listener_policy" {
         Action = [
           "transfer:ListFileTransferResults"
         ]
-        Resource = "*"
+        Resource = module.sftp_connector.connector_arn
       },
       {
         Effect = "Allow"
@@ -484,6 +486,7 @@ resource "aws_scheduler_schedule" "status_checker" {
   count = var.enable_dynamodb_tracking ? 1 : 0
   
   name = "transfer-status-checker-${random_pet.name.id}"
+  kms_key_arn = local.kms_key_arn
   
   flexible_time_window {
     mode = "OFF"
