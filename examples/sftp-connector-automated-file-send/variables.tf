@@ -54,17 +54,7 @@ variable "sftp_server_endpoint" {
   type        = string
 }
 
-variable "source_s3_bucket_name" {
-  description = "S3 bucket name for AWS Transfer Family server (if connecting to AWS SFTP)"
-  type        = string
-  default     = null
-}
 
-variable "source_s3_bucket_arn" {
-  description = "S3 bucket ARN for AWS Transfer Family server (if connecting to AWS SFTP)"
-  type        = string
-  default     = null
-}
 
 variable "test_connector_post_deployment" {
   description = "Whether to test the connector connection after deployment"

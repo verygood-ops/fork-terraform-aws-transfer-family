@@ -28,10 +28,7 @@ variable "s3_bucket_arn" {
   }
 }
 
-variable "s3_bucket_name" {
-  description = "Name of the S3 bucket to connect to the SFTP server"
-  type        = string
-}
+
 
 variable "user_secret_id" {
   description = "ARN of the AWS Secrets Manager secret containing SFTP credentials (optional - will auto-detect for AWS Transfer Family servers)"
@@ -85,39 +82,10 @@ variable "tags" {
   default     = {}
 }
 
-variable "as2_mdn_response" {
-  description = "AS2 MDN response for the connector"
-  type        = string
-  default     = "NONE"
-
-  validation {
-    condition     = contains(["SYNC", "NONE"], var.as2_mdn_response)
-    error_message = "AS2 MDN response must be either 'SYNC' or 'NONE'"
-  }
-}
-
-variable "as2_signing_algorithm" {
-  description = "AS2 signing algorithm for the connector"
-  type        = string
-  default     = "NONE"
-}
-
-variable "as2_mdn_signing_algorithm" {
-  description = "AS2 MDN signing algorithm for the connector"
-  type        = string
-  default     = "NONE"
-}
-
 variable "trusted_host_keys" {
   description = "Trusted-Host-Key is the public portion of the host key(s) that is used to identify the remote server you need to connect to. You can enter the Trusted Host Key(s) now, or add them after creating the connector by using the host key information returned by the TestConnection action. Note that your connector will be able to create connections to the remote server only if the server's SSH fingerprint matches one of the provided Trusted Host Key(s). If empty, SSH key auto-discovery will run automatically."
   type        = list(string)
   default     = []
-}
-variable "sftp_password" {
-  description = "SFTP password for authentication (optional if using private key)"
-  type        = string
-  default     = ""
-  sensitive   = true
 }
 
 variable "sftp_private_key" {
