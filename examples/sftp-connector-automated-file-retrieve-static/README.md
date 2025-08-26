@@ -1,3 +1,4 @@
+<!-- BEGIN_TF_DOCS -->
 # AWS Transfer Family SFTP Connector Example with Automated File Retrieval
 
 This example demonstrates how to use the AWS Transfer Family SFTP connector module to automatically retrieve specific files from an external SFTP server on a scheduled basis using EventBridge Scheduler.
@@ -88,14 +89,6 @@ terraform init
 terraform apply
 ```
 
-Alternatively, you can use the provided `.envrc` file with [direnv](https://direnv.net/):
-
-```bash
-direnv allow
-terraform init
-terraform apply
-```
-
 ### Option 3: Command Line Variables
 
 ```bash
@@ -114,24 +107,27 @@ terraform apply -var="sftp_server_endpoint=example.com" \
 After deploying the infrastructure, you can test the automatic file retrieval:
 
 ### Option 1: Wait for the scheduled retrieval
+
 The EventBridge Scheduler will automatically trigger file retrieval based on your configured schedule.
 
 ### Option 2: Manually trigger the scheduler
+
 ```bash
 # Get the scheduler name from Terraform outputs
-terraform output eventbridge_schedule_name
+terraform output scheduler_name
 
 # Manually trigger the scheduler (if supported by AWS CLI)
-aws scheduler invoke-schedule --name $(terraform output -raw eventbridge_schedule_name)
+aws scheduler invoke-schedule --name $(terraform output -raw scheduler_name)
 ```
 
 ### Option 3: Check the S3 bucket for retrieved files
+
 ```bash
 # Get the S3 bucket name from Terraform outputs
-terraform output retrieve_bucket_name
+terraform output s3_bucket_name
 
 # List retrieved files
-aws s3 ls s3://$(terraform output -raw retrieve_bucket_name)/retrieved-files/
+aws s3 ls s3://$(terraform output -raw s3_bucket_name)/retrieved-files/
 ```
 
 ### Monitoring the Retrieval
@@ -145,10 +141,11 @@ You can monitor the retrieval process by checking:
 3. **EventBridge Scheduler console** to see schedule execution history
 
 4. **DynamoDB table** (if enabled) to track transfer metadata:
+
    ```bash
    # Get the DynamoDB table name from Terraform outputs (if enabled)
    terraform output dynamodb_table_name
-   
+
    # Query transfer records
    aws dynamodb scan --table-name $(terraform output -raw dynamodb_table_name)
    ```
@@ -157,47 +154,73 @@ You can monitor the retrieval process by checking:
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.5 |
-| aws | >= 5.95.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.95.0 |
+| <a name="requirement_awscc"></a> [awscc](#requirement\_awscc) | >= 0.24.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.0.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.0.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_retrieve_s3_bucket"></a> [retrieve\_s3\_bucket](#module\_retrieve\_s3\_bucket) | terraform-aws-modules/s3-bucket/aws | ~> 4.0 |
+| <a name="module_sftp_connector"></a> [sftp\_connector](#module\_sftp\_connector) | ../../modules/transfer-connectors | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_dynamodb_table.file_transfer_tracking](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
+| [aws_iam_policy.dynamodb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.scheduler_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.scheduler_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.scheduler_dynamodb_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_kms_alias.transfer_family_key_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.transfer_family_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_key_policy.transfer_family_key_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key_policy) | resource |
+| [aws_scheduler_schedule.dynamodb_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule) | resource |
+| [aws_scheduler_schedule.sftp_retrieve_direct](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule) | resource |
+| [random_pet.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_secretsmanager_secret.existing](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| aws_region | AWS region | `string` | `"us-east-1"` | no |
-| sftp_server_endpoint | SFTP server endpoint hostname (e.g., example.com) - sftp:// prefix will be added automatically | `string` | n/a | yes |
-| existing_secret_arn | ARN of an existing Secrets Manager secret containing SFTP credentials (must contain username and either password or privateKey). If not provided, a new secret will be created. | `string` | `null` | no |
-| sftp_username | Username for SFTP authentication (used only if existing_secret_arn is not provided) | `string` | `"sftp-user"` | no |
-| sftp_private_key | Private key for SFTP authentication (used only if existing_secret_arn is not provided and sftp_password is not provided) | `string` | `""` | no |
-| trusted_host_keys | List of trusted host keys for the SFTP server (required for secure connections) | `list(string)` | `[]` | no |
-| connector_id | Existing connector ID to use for file retrieval. If not provided, a new connector will be created. | `string` | `null` | no |
-| s3_prefix | S3 prefix to store retrieved files (local directory path) | `string` | `"retrieved-files"` | no |
-| eventbridge_schedule | EventBridge schedule expression for automated file retrieval (e.g., 'rate(1 hour)' or 'cron(0 9 * * ? *)') | `string` | `"rate(1 hour)"` | no |
-| file_paths_to_retrieve | List of file paths on the remote SFTP server to retrieve | `list(string)` | `["/uploads/report.csv", "/uploads/sample1.txt", "/uploads/sample2.txt"]` | no |
-| enable_dynamodb_tracking | Enable DynamoDB table to track file transfer status | `bool` | `false` | no |
-| test_connector_post_deployment | Whether to test the connector connection after deployment | `bool` | `false` | no |
+| <a name="input_sftp_server_endpoint"></a> [sftp\_server\_endpoint](#input\_sftp\_server\_endpoint) | SFTP server endpoint hostname (e.g., example.com) - sftp:// prefix will be added automatically | `string` | n/a | yes |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"us-east-1"` | no |
+| <a name="input_connector_id"></a> [connector\_id](#input\_connector\_id) | Existing connector ID to use for file retrieval. If not provided, a new connector will be created. | `string` | `null` | no |
+| <a name="input_enable_dynamodb_tracking"></a> [enable\_dynamodb\_tracking](#input\_enable\_dynamodb\_tracking) | Enable DynamoDB table to track file transfer status | `bool` | `false` | no |
+| <a name="input_eventbridge_schedule"></a> [eventbridge\_schedule](#input\_eventbridge\_schedule) | EventBridge schedule expression for automated file retrieval (e.g., 'rate(1 hour)' or 'cron(0 9 * * ? *)') | `string` | `"rate(1 hour)"` | no |
+| <a name="input_existing_secret_arn"></a> [existing\_secret\_arn](#input\_existing\_secret\_arn) | ARN of an existing Secrets Manager secret containing SFTP credentials (must contain username and either password or privateKey). If not provided, a new secret will be created. | `string` | `null` | no |
+| <a name="input_file_paths_to_retrieve"></a> [file\_paths\_to\_retrieve](#input\_file\_paths\_to\_retrieve) | List of file paths on the remote SFTP server to retrieve | `list(string)` | <pre>[<br/>  "/uploads/report.csv",<br/>  "/uploads/sample1.txt",<br/>  "/uploads/sample2.txt"<br/>]</pre> | no |
+| <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | S3 prefix to store retrieved files (local directory path) | `string` | `"retrieved-files"` | no |
+| <a name="input_sftp_private_key"></a> [sftp\_private\_key](#input\_sftp\_private\_key) | Private key for SFTP authentication (used only if existing\_secret\_arn is not provided and sftp\_password is not provided) | `string` | `""` | no |
+| <a name="input_sftp_username"></a> [sftp\_username](#input\_sftp\_username) | Username for SFTP authentication (used only if existing\_secret\_arn is not provided) | `string` | `"sftp-user"` | no |
+| <a name="input_test_connector_post_deployment"></a> [test\_connector\_post\_deployment](#input\_test\_connector\_post\_deployment) | Whether to test the connector connection after deployment | `bool` | `false` | no |
+| <a name="input_trusted_host_keys"></a> [trusted\_host\_keys](#input\_trusted\_host\_keys) | List of trusted host keys for the SFTP server (required for secure connections) | `list(string)` | `[]` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| connector_id | The ID of the SFTP connector |
-| connector_arn | The ARN of the SFTP connector |
-| retrieve_bucket_name | Name of the S3 bucket for retrieved files |
-| retrieve_bucket_arn | ARN of the S3 bucket for retrieved files |
-| kms_key_arn | ARN of the KMS key used for encryption |
-| eventbridge_schedule_name | Name of the EventBridge schedule |
-| eventbridge_schedule_arn | ARN of the EventBridge schedule |
-| sftp_credentials_secret_arn | ARN of the Secrets Manager secret containing SFTP credentials |
-| dynamodb_table_name | Name of the DynamoDB table for file transfer tracking (if enabled) |
-| dynamodb_table_arn | ARN of the DynamoDB table for file transfer tracking (if enabled) |
-
-## Notes
-
-- This example creates resources that may incur AWS charges
-- The SFTP server endpoint should be just the hostname (e.g., `example.com`)
-- You must provide either an existing secret ARN or credentials to create a new secret
-- The connector uses the AWS Transfer Family service to securely connect to the external SFTP server
-- EventBridge Scheduler directly initiates file transfers for the specified file paths
-- The example uses `TransferSFTPConnectorSecurityPolicy-2024-03` as the security policy for the SFTP connector
-- Files are retrieved exactly as specified in the `file_paths_to_retrieve` variable
+| <a name="output_connector_arn"></a> [connector\_arn](#output\_connector\_arn) | The ARN of the SFTP connector |
+| <a name="output_connector_id"></a> [connector\_id](#output\_connector\_id) | The ID of the SFTP connector |
+| <a name="output_dynamodb_table_arn"></a> [dynamodb\_table\_arn](#output\_dynamodb\_table\_arn) | ARN of the DynamoDB table for file transfer tracking (if enabled) |
+| <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | Name of the DynamoDB table for file transfer tracking (if enabled) |
+| <a name="output_eventbridge_schedule_arn"></a> [eventbridge\_schedule\_arn](#output\_eventbridge\_schedule\_arn) | ARN of the EventBridge schedule |
+| <a name="output_eventbridge_schedule_name"></a> [eventbridge\_schedule\_name](#output\_eventbridge\_schedule\_name) | Name of the EventBridge schedule |
+| <a name="output_kms_key_arn"></a> [kms\_key\_arn](#output\_kms\_key\_arn) | ARN of the KMS key used for encryption |
+| <a name="output_retrieve_bucket_arn"></a> [retrieve\_bucket\_arn](#output\_retrieve\_bucket\_arn) | ARN of the S3 bucket for retrieved files |
+| <a name="output_retrieve_bucket_name"></a> [retrieve\_bucket\_name](#output\_retrieve\_bucket\_name) | Name of the S3 bucket for retrieved files |
+| <a name="output_sftp_credentials_secret_arn"></a> [sftp\_credentials\_secret\_arn](#output\_sftp\_credentials\_secret\_arn) | ARN of the Secrets Manager secret containing SFTP credentials |
+<!-- END_TF_DOCS -->
