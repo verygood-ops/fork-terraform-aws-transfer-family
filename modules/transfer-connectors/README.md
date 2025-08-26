@@ -4,16 +4,19 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.95.0 |
+| <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
-| <a name="provider_external"></a> [external](#provider\_external) | n/a |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| <a name="provider_external"></a> [external](#provider\_external) | >= 2.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -51,19 +54,14 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_s3_bucket_arn"></a> [s3\_bucket\_arn](#input\_s3\_bucket\_arn) | ARN of the S3 bucket to connect to the SFTP server | `string` | n/a | yes |
-| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | Name of the S3 bucket to connect to the SFTP server | `string` | n/a | yes |
 | <a name="input_url"></a> [url](#input\_url) | URL of the SFTP server to connect to (e.g., example.com or sftp://example.com:22) | `string` | n/a | yes |
 | <a name="input_S3_kms_key_arn"></a> [S3\_kms\_key\_arn](#input\_S3\_kms\_key\_arn) | ARN of the KMS key used for encryption (optional) | `string` | `null` | no |
-| <a name="input_as2_mdn_response"></a> [as2\_mdn\_response](#input\_as2\_mdn\_response) | AS2 MDN response for the connector | `string` | `"NONE"` | no |
-| <a name="input_as2_mdn_signing_algorithm"></a> [as2\_mdn\_signing\_algorithm](#input\_as2\_mdn\_signing\_algorithm) | AS2 MDN signing algorithm for the connector | `string` | `"NONE"` | no |
-| <a name="input_as2_signing_algorithm"></a> [as2\_signing\_algorithm](#input\_as2\_signing\_algorithm) | AS2 signing algorithm for the connector | `string` | `"NONE"` | no |
 | <a name="input_connector_name"></a> [connector\_name](#input\_connector\_name) | Name of the AWS Transfer Family connector | `string` | `"sftp-connector"` | no |
 | <a name="input_logging_role"></a> [logging\_role](#input\_logging\_role) | IAM role ARN for CloudWatch logging (if not provided, a new role will be created) | `string` | `null` | no |
 | <a name="input_secret_kms_key_id"></a> [secret\_kms\_key\_id](#input\_secret\_kms\_key\_id) | KMS key ID for encrypting the secret | `string` | `null` | no |
 | <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name) | Name for the new secret (only used when create\_secret is true) | `string` | `null` | no |
 | <a name="input_secrets_manager_kms_key_arn"></a> [secrets\_manager\_kms\_key\_arn](#input\_secrets\_manager\_kms\_key\_arn) | ARN of the KMS key used to encrypt the secrets manager secret containing SFTP credentials | `string` | `null` | no |
 | <a name="input_security_policy_name"></a> [security\_policy\_name](#input\_security\_policy\_name) | The name of the security policy to use for the connector (must be in the format TransferSFTPConnectorSecurityPolicy-*) | `string` | `"TransferSFTPConnectorSecurityPolicy-2024-03"` | no |
-| <a name="input_sftp_password"></a> [sftp\_password](#input\_sftp\_password) | SFTP password for authentication (optional if using private key) | `string` | `""` | no |
 | <a name="input_sftp_private_key"></a> [sftp\_private\_key](#input\_sftp\_private\_key) | SFTP private key for authentication (optional if using password) | `string` | `""` | no |
 | <a name="input_sftp_username"></a> [sftp\_username](#input\_sftp\_username) | SFTP username for authentication | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources | `map(string)` | `{}` | no |

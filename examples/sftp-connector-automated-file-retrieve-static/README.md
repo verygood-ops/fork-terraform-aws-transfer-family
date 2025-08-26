@@ -155,6 +155,7 @@ You can monitor the retrieval process by checking:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.95.0 |
 | <a name="requirement_awscc"></a> [awscc](#requirement\_awscc) | >= 0.24.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.0.0 |
@@ -163,7 +164,7 @@ You can monitor the retrieval process by checking:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.0.0 |
 
@@ -226,6 +227,7 @@ You can monitor the retrieval process by checking:
 |------|-------------|
 | <a name="output_connector_arn"></a> [connector\_arn](#output\_connector\_arn) | The ARN of the SFTP connector |
 | <a name="output_connector_id"></a> [connector\_id](#output\_connector\_id) | The ID of the SFTP connector |
+| <a name="output_connector_static_ips"></a> [connector\_static\_ips](#output\_connector\_static\_ips) | Static IP addresses of the SFTP connector |
 | <a name="output_dynamodb_table_arn"></a> [dynamodb\_table\_arn](#output\_dynamodb\_table\_arn) | ARN of the DynamoDB table for file transfer tracking (if enabled) |
 | <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | Name of the DynamoDB table for file transfer tracking (if enabled) |
 | <a name="output_eventbridge_schedule_arn"></a> [eventbridge\_schedule\_arn](#output\_eventbridge\_schedule\_arn) | ARN of the EventBridge schedule |

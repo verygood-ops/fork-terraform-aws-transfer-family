@@ -150,6 +150,7 @@ You can monitor the transfer process by checking:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.95.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1 |
 
@@ -157,7 +158,7 @@ You can monitor the transfer process by checking:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1 |
 
@@ -202,8 +203,6 @@ You can monitor the transfer process by checking:
 | <a name="input_existing_secret_arn"></a> [existing\_secret\_arn](#input\_existing\_secret\_arn) | ARN of an existing Secrets Manager secret containing SFTP credentials (must contain username and either password or privateKey). If not provided, a new secret will be created. | `string` | `null` | no |
 | <a name="input_sftp_private_key"></a> [sftp\_private\_key](#input\_sftp\_private\_key) | Private key for SFTP authentication (used only if existing\_secret\_arn is not provided and sftp\_password is not provided) | `string` | `""` | no |
 | <a name="input_sftp_username"></a> [sftp\_username](#input\_sftp\_username) | Username for SFTP authentication (used only if existing\_secret\_arn is not provided) | `string` | `""` | no |
-| <a name="input_source_s3_bucket_arn"></a> [source\_s3\_bucket\_arn](#input\_source\_s3\_bucket\_arn) | S3 bucket ARN for AWS Transfer Family server (if connecting to AWS SFTP) | `string` | `null` | no |
-| <a name="input_source_s3_bucket_name"></a> [source\_s3\_bucket\_name](#input\_source\_s3\_bucket\_name) | S3 bucket name for AWS Transfer Family server (if connecting to AWS SFTP) | `string` | `null` | no |
 | <a name="input_test_connector_post_deployment"></a> [test\_connector\_post\_deployment](#input\_test\_connector\_post\_deployment) | Whether to test the connector connection after deployment | `bool` | `false` | no |
 | <a name="input_trusted_host_keys"></a> [trusted\_host\_keys](#input\_trusted\_host\_keys) | List of trusted host keys for the SFTP server (required for secure connections) | `list(string)` | `[]` | no |
 

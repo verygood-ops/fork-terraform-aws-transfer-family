@@ -183,6 +183,7 @@ You can monitor the discovery and retrieval process by checking:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.95.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1 |
 
@@ -190,7 +191,7 @@ You can monitor the discovery and retrieval process by checking:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1 |
 
@@ -243,7 +244,7 @@ You can monitor the discovery and retrieval process by checking:
 | <a name="input_sftp_server_endpoint"></a> [sftp\_server\_endpoint](#input\_sftp\_server\_endpoint) | SFTP server endpoint hostname (e.g., example.com) - sftp:// prefix will be added automatically | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"us-east-1"` | no |
 | <a name="input_enable_dynamodb_tracking"></a> [enable\_dynamodb\_tracking](#input\_enable\_dynamodb\_tracking) | Enable DynamoDB tracking for file transfers | `bool` | `false` | no |
-| <a name="input_eventbridge_schedule"></a> [eventbridge\_schedule](#input\_eventbridge\_schedule) | EventBridge schedule expression for automated file retrieval (e.g., 'rate(1 hour)' or 'cron(0 9 * * ? *)') | `string` | `"rate(1 hour)"` | no |
+| <a name="input_eventbridge_schedule"></a> [eventbridge\_schedule](#input\_eventbridge\_schedule) | EventBridge schedule expression for automated file retrieval (e.g., 'rate(1 hour)' or 'cron(0 9 * * ? *)') | `string` | `"rate(1 minute)"` | no |
 | <a name="input_existing_secret_arn"></a> [existing\_secret\_arn](#input\_existing\_secret\_arn) | ARN of an existing Secrets Manager secret containing SFTP credentials (must contain username and either password or privateKey). If not provided, a new secret will be created. | `string` | `null` | no |
 | <a name="input_s3_prefix"></a> [s3\_prefix](#input\_s3\_prefix) | S3 prefix to store retrieved files (local directory path) | `string` | `"retrieved-files"` | no |
 | <a name="input_sftp_private_key"></a> [sftp\_private\_key](#input\_sftp\_private\_key) | Private key for SFTP authentication (used only if existing\_secret\_arn is not provided and sftp\_password is not provided) | `string` | `""` | no |
@@ -258,6 +259,7 @@ You can monitor the discovery and retrieval process by checking:
 |------|-------------|
 | <a name="output_connector_arn"></a> [connector\_arn](#output\_connector\_arn) | ARN of the SFTP connector |
 | <a name="output_connector_id"></a> [connector\_id](#output\_connector\_id) | ID of the SFTP connector |
+| <a name="output_connector_static_ips"></a> [connector\_static\_ips](#output\_connector\_static\_ips) | Static IP addresses of the SFTP connector |
 | <a name="output_dynamodb_table_arn"></a> [dynamodb\_table\_arn](#output\_dynamodb\_table\_arn) | ARN of the DynamoDB table for tracking file transfers |
 | <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | Name of the DynamoDB table for tracking file transfers |
 | <a name="output_eventbridge_schedule_arn"></a> [eventbridge\_schedule\_arn](#output\_eventbridge\_schedule\_arn) | ARN of the EventBridge schedule |
