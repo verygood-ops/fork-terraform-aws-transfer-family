@@ -150,6 +150,16 @@ This project utilizes multiple modules to create a complete AWS Transfer Family 
   - Integration with S3 bucket permissions
   - KMS encryption key access management
 
+### Transfer Connectors Module
+
+- Purpose: Creates SFTP connectors for automated file transfers
+- Key features:
+  - External SFTP server connectivity
+  - EventBridge Scheduler integration for automated retrieval
+  - Secrets Manager integration for credential management
+  - SSH host key auto-discovery and validation
+  - Static IP address support for outbound connections
+
 ## Installation
 
 To use these modules in your Terraform configuration:
@@ -161,6 +171,21 @@ module "transfer_server" {
   source = "aws-ia/transfer-family/aws//modules/transfer-server"
 
   # Module parameters
+  # ...
+}
+
+module "transfer_connectors" {
+  source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
+
+  # Required parameters
+  url            = "sftp://external-server.com"
+  s3_bucket_arn  = "arn:aws:s3:::my-bucket"
+
+  # Optional parameters
+  sftp_username  = "sftp-user"
+  sftp_private_key = file("~/.ssh/id_rsa")
+  trusted_host_keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAA..."]
+
   # ...
 }
 ```
@@ -209,6 +234,35 @@ module "transfer_server" {
 }
 ```
 
+### SFTP Connector with Automated File Retrieval
+
+```hcl
+module "sftp_connector" {
+  source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
+
+  # Required parameters
+  url           = "sftp://external-server.com"
+  s3_bucket_arn = aws_s3_bucket.files.arn
+
+  # Authentication
+  sftp_username    = "sftp-user"
+  sftp_private_key = file("~/.ssh/id_rsa")
+
+  # Security - SSH host keys for validation
+  trusted_host_keys = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAA..."
+  ]
+
+  # Optional features
+  test_connector_post_deployment = true
+
+  tags = {
+    Environment = "Demo"
+    Project     = "File Transfer"
+  }
+}
+```
+
 ## Example for Internet Facing VPC Endpoint Configuration
 
 This example demonstrates an internet-facing VPC endpoint configuration:
@@ -233,6 +287,18 @@ Key points about VPC endpoint types:
 - Internet-facing endpoints require Elastic IPs and public subnets
 - **Internal endpoint**: Created when `address_allocation_ids` are omitted
 - Internal endpoints are only accessible from within the VPC or connected networks
+
+## Key Connector Configuration
+
+When using Transfer Connectors, pay attention to these critical attributes:
+
+- **`url`**: SFTP server endpoint (required) - automatically adds `sftp://` prefix if not provided
+- **`s3_bucket_arn`**: Target S3 bucket ARN for file storage (required)
+- **`trusted_host_keys`**: SSH host keys for server validation - leave empty for auto-discovery
+- **`sftp_username`** and **`sftp_private_key`**: Authentication credentials
+- **`user_secret_id`**: Alternative to providing credentials directly - use existing Secrets Manager secret
+- **`security_policy_name`**: Must use connector-specific policies (default: `TransferSFTPConnectorSecurityPolicy-2024-03`)
+- **`test_connector_post_deployment`**: Enable to validate connectivity after deployment - requires AWS CLI installation and checks for specific version compatibility. Will warn but not fail deployment if conditions aren't met.
 
 ## Support & Feedback
 
