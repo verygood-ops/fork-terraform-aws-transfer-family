@@ -5,10 +5,12 @@ This repository contains Terraform code which creates resources required to run 
 
 ## Overview
 
-This module creates and configures an AWS Transfer Server with the following features:
+This module creates and configures AWS Transfer Family resources with the following features:
 
-- Basic Transfer Server setup with SFTP protocol and security policies
-- Custom hostname support through AWS Route53 or other DNS providers(Optional)
+- **Transfer Server**: SFTP server setup with protocol and security policies
+- **Transfer Connectors**: Automated file transfer to/from external SFTP servers
+- **Transfer Users**: User management with S3 bucket permissions and KMS access
+- Custom hostname support through AWS Route53 or other DNS providers (Optional)
 - CloudWatch logging configuration with customizable retention
 
 ## Quick Start
@@ -41,6 +43,15 @@ Figure 1: High-level architecture of AWS Transfer Family deployment using this T
 Figure 2: Architecture using VPC endpoints of the AWS Transfer Family deployment using this Terraform module
 
 ## Features
+
+### Transfer Connectors
+
+- Automated file transfer to/from external SFTP servers
+- Support for scheduled file retrieval using EventBridge Scheduler
+- Secure credential management via AWS Secrets Manager
+- SSH host key validation and auto-discovery
+- Static IP addresses for outbound connections
+- Integration with S3 for file storage and KMS for encryption
 
 ### Transfer Server Configuration
 
