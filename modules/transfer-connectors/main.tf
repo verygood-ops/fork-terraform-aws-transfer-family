@@ -136,6 +136,12 @@ data "aws_region" "current" {}
 # Try to get connector IP information via AWS CLI
 data "external" "connector_ips" {
   program = ["bash", "-c", <<-EOF
+    # Check if AWS CLI is available
+    if ! command -v aws >/dev/null 2>&1; then
+      echo "{\"ips\": \"\", \"status\": \"cli_not_available\", \"note\": \"AWS CLI not found\"}"
+      exit 0
+    fi
+    
     # Try to describe the connector and extract any IP information
     connector_info=$(aws transfer describe-connector --connector-id "${aws_transfer_connector.sftp_connector.id}" --region "${data.aws_region.current.id}" 2>/dev/null || echo "{}")
     
@@ -244,6 +250,10 @@ resource "terraform_data" "discover_and_test_connector" {
   
   provisioner "local-exec" {
     command = <<-EOT
+      # Wait 10 seconds for connector to be fully ready
+      echo "Waiting 10 seconds for connector to be fully ready..."
+      sleep 10
+      
       # Check if AWS CLI is available
       if ! command -v aws &> /dev/null; then
         echo "AWS CLI not found - connector testing skipped"
