@@ -261,6 +261,25 @@ resource "terraform_data" "discover_and_test_connector" {
         exit 0
       fi
       
+      # Check AWS CLI version (requires 2.28.x or above)
+      AWS_VERSION=$(aws --version 2>&1 | cut -d'/' -f2 | cut -d' ' -f1)
+      if [ -n "$AWS_VERSION" ]; then
+        MAJOR=$(echo "$AWS_VERSION" | cut -d'.' -f1)
+        MINOR=$(echo "$AWS_VERSION" | cut -d'.' -f2)
+        
+        if [ "$MAJOR" -lt 2 ] || ([ "$MAJOR" -eq 2 ] && [ "$MINOR" -lt 28 ]); then
+          echo "AWS CLI version $AWS_VERSION detected - connector testing requires version 2.28.x or above"
+          echo "connector testing skipped"
+          echo "Deployment completed successfully"
+          exit 0
+        fi
+        echo "AWS CLI version $AWS_VERSION - version check passed"
+      else
+        echo "Could not determine AWS CLI version - connector testing skipped"
+        echo "Deployment completed successfully"
+        exit 0
+      fi
+      
       # Check if jq is available (required for JSON parsing)
       if ! command -v jq &> /dev/null; then
         echo "jq not found - connector testing skipped"
