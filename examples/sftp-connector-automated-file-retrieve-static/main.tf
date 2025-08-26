@@ -153,7 +153,6 @@ module "sftp_connector" {
   connector_name    = local.connector_name
   url               = var.sftp_server_endpoint
   s3_bucket_arn     = module.retrieve_s3_bucket.s3_bucket_arn
-  s3_bucket_name    = module.retrieve_s3_bucket.s3_bucket_id
 
   # Use existing secret or create new one
   user_secret_id                  = var.existing_secret_arn
@@ -220,10 +219,10 @@ resource "aws_scheduler_schedule" "dynamodb_logging" {
           N = tostring(length(var.file_paths_to_retrieve))
         }
         started_at = {
-          S = "${formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())}"
+          S = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())
         }
         updated_at = {
-          S = "${formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())}"
+          S = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())
         }
         s3_destination = {
           S = "/${module.retrieve_s3_bucket.s3_bucket_id}/${var.s3_prefix}"
@@ -240,6 +239,7 @@ resource "aws_scheduler_schedule" "sftp_retrieve_direct" {
   name = "sftp-retrieve-direct-${random_pet.name.id}"
   
   schedule_expression = var.eventbridge_schedule
+  state               = "ENABLED"
   kms_key_arn         = local.kms_key_arn
   
   flexible_time_window {
