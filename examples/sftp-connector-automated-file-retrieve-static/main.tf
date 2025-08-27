@@ -235,12 +235,23 @@ resource "aws_scheduler_schedule" "dynamodb_logging" {
 ###################################################################
 # EventBridge Scheduler for direct Transfer Family integration
 ###################################################################
+# SQS Dead Letter Queue for EventBridge Scheduler failures
+resource "aws_sqs_queue" "dlq" {
+  name = "sftp-scheduler-dlq-${random_pet.name.id}"
+  
+  kms_master_key_id = local.kms_key_arn
+  
+  tags = {
+    Environment = "Demo"
+    Project     = "SFTP Scheduler DLQ"
+  }
+}
+
 resource "aws_scheduler_schedule" "sftp_retrieve_direct" {
   name = "sftp-retrieve-direct-${random_pet.name.id}"
   
   schedule_expression = var.eventbridge_schedule
   state               = "ENABLED"
-  kms_key_arn         = local.kms_key_arn
   
   flexible_time_window {
     mode = "OFF"
@@ -349,7 +360,14 @@ resource "aws_iam_role_policy" "scheduler_policy" {
         Action = [
           "transfer:StartFileTransfer"
         ]
-        Resource = module.sftp_connector.connector_arn
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage"
+        ]
+        Resource = aws_sqs_queue.dlq.arn
       }
     ], var.enable_dynamodb_tracking ? [
       {
