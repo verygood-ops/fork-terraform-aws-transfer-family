@@ -229,6 +229,7 @@ resource "aws_sqs_queue" "dlq" {
 }
 
 resource "aws_scheduler_schedule" "sftp_retrieve_direct" {
+  #checkov:skip=CKV_AWS_297: "KMS encryption not required for this demo scheduler"
   name = "sftp-retrieve-direct-${random_pet.name.id}"
   
   schedule_expression = var.eventbridge_schedule
