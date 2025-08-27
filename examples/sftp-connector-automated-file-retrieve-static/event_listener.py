@@ -59,50 +59,30 @@ def handle_status_check():
         
         for item in pending_transfers:
             batch_id = item['batch_id']
+            files_uploaded = item.get('files_uploaded', '')
             
-            # For static example, we need to find actual transfer IDs
-            # Since static example doesn't have real transfer IDs, skip the API check
-            # and mark as completed after a reasonable time
-            started_at = datetime.fromisoformat(item['started_at'].replace('Z', '+00:00'))
-            now = datetime.now(started_at.tzinfo)
-            time_diff = (now - started_at).total_seconds()
-            
-            # If transfer has been running for more than 2 minutes, mark as completed
-            if time_diff > 120:  # 2 minutes
-                files_count = int(item.get('files_count', 0))
-                
-                update_data = {
-                    'status': 'COMPLETED',
-                    'files_successful': files_count,
-                    'files_failed': 0,
-                    'completed_at': now.isoformat(),
-                    'updated_at': now.isoformat()
-                }
-                
-                # Update the batch record
-                update_expression = 'SET ' + ', '.join([f'#{k} = :{k}' if k == 'status' else f'{k} = :{k}' for k in update_data.keys()])
-                expression_values = {f':{k}': v for k, v in update_data.items()}
-                expression_names = {'#status': 'status'} if 'status' in update_data else {}
-                
-                update_params = {
-                    'Key': {'batch_id': batch_id},
-                    'UpdateExpression': update_expression,
-                    'ExpressionAttributeValues': expression_values
-                }
-                
-                if expression_names:
-                    update_params['ExpressionAttributeNames'] = expression_names
-                
-                table.update_item(**update_params)
-                
-                print(f"Marked batch {batch_id} as completed (static example)")
+            # Mark as completed immediately
+            try:
+                table.update_item(
+                    Key={'batch_id': batch_id},
+                    UpdateExpression='SET #status = :status, completed_at = :completed_at, updated_at = :updated_at',
+                    ExpressionAttributeNames={'#status': 'status'},
+                    ExpressionAttributeValues={
+                        ':status': 'COMPLETED',
+                        ':completed_at': datetime.now().isoformat(),
+                        ':updated_at': datetime.now().isoformat()
+                    }
+                )
+                print(f"Marked batch {batch_id} as completed with files: {files_uploaded}")
                 transfers_checked += 1
+            except Exception as e:
+                print(f"Error updating batch {batch_id}: {str(e)}")
         
         return {
             'statusCode': 200,
             'body': json.dumps({
                 'message': 'Transfer status check completed',
-                'transfers_checked': transfers_checked
+                'transfers_completed': transfers_checked
             })
         }
         

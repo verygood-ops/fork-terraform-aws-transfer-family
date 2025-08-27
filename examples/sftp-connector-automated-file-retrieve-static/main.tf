@@ -203,7 +203,7 @@ resource "aws_scheduler_schedule" "dynamodb_logging" {
           S = module.sftp_connector.connector_id
         }
         files_uploaded = {
-          N = tostring(length(var.file_paths_to_retrieve))
+          S = join(",", var.file_paths_to_retrieve)
         }
         status = {
           S = "TRANSFER_STARTED"
@@ -359,6 +359,14 @@ resource "aws_iam_role_policy" "scheduler_policy" {
           "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.file_transfer_tracking[0].arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = local.kms_key_arn
       }
     ] : [])
   })
@@ -535,6 +543,14 @@ resource "aws_iam_role_policy" "status_checker_scheduler_policy" {
           "lambda:InvokeFunction"
         ]
         Resource = aws_lambda_function.event_listener[0].arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = local.kms_key_arn
       }
     ]
   })
