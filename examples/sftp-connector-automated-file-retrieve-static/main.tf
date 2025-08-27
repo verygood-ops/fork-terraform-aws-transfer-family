@@ -197,35 +197,16 @@ resource "aws_scheduler_schedule" "dynamodb_logging" {
       TableName = aws_dynamodb_table.file_transfer_tracking[0].name
       Item = {
         batch_id = {
-          S = "static-batch-${random_pet.name.id}-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-        }
-        transfer_id = {
-          S = "static-transfer-${random_pet.name.id}"
+          S = "batch-${random_pet.name.id}"
         }
         connector_id = {
           S = module.sftp_connector.connector_id
         }
-        status = {
-          S = "TRANSFER_STARTED"
-        }
-        file_paths = {
-          L = [
-            for path in var.file_paths_to_retrieve : {
-              S = path
-            }
-          ]
-        }
-        files_count = {
+        files_uploaded = {
           N = tostring(length(var.file_paths_to_retrieve))
         }
-        started_at = {
-          S = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())
-        }
-        updated_at = {
-          S = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())
-        }
-        s3_destination = {
-          S = "/${module.retrieve_s3_bucket.s3_bucket_id}/${var.s3_prefix}"
+        status = {
+          S = "TRANSFER_STARTED"
         }
       }
     })
@@ -360,7 +341,7 @@ resource "aws_iam_role_policy" "scheduler_policy" {
         Action = [
           "transfer:StartFileTransfer"
         ]
-        Resource = "*"
+        Resource = module.sftp_connector.connector_arn
       },
       {
         Effect = "Allow"
