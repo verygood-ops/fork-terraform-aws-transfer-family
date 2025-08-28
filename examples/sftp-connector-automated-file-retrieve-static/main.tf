@@ -381,8 +381,8 @@ data "archive_file" "event_listener_zip" {
   count = var.enable_dynamodb_tracking ? 1 : 0
   
   type        = "zip"
-  source_file = "event_listener.py"
-  output_path = "event_listener.zip"
+  source_file = "${path.module}/event_listener.py"
+  output_path = "${path.module}/event_listener.zip"
 }
 
 resource "aws_lambda_function" "event_listener" {
@@ -391,7 +391,7 @@ resource "aws_lambda_function" "event_listener" {
   #checkov:skip=CKV_AWS_272: "Lambda function does not require code signing for this use case"
   #checkov:skip=CKV_AWS_116: "Lambda function does not require DLQ for this use case"
   #checkov:skip=CKV_AWS_117: "Lambda function does not require VPC configuration for this use case"
-  filename         = "event_listener.zip"
+  filename         = data.archive_file.event_listener_zip[0].output_path
   function_name    = "sftp-event-listener-${random_pet.name.id}"
   role            = aws_iam_role.event_listener_role[0].arn
   handler         = "event_listener.lambda_handler"

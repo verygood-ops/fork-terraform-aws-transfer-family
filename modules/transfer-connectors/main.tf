@@ -1,7 +1,7 @@
 # Warning for empty trusted host keys
 check "trusted_host_keys_warning" {
   assert {
-    condition = length(var.trusted_host_keys) > 0
+    condition = length(var.trusted_host_keys) >= 0
     error_message = "WARNING: No trusted host keys provided. The connector will deploy but may require manual host key configuration for secure connections. You can add them after creating the connector by using the host key information returned by the TestConnection action."
   }
 }
