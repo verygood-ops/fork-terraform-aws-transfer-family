@@ -14,7 +14,7 @@
 | Name | Version |
 |------|---------|
 | <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | >= 2.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
