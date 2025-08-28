@@ -18,17 +18,16 @@ variable "url" {
   }
 }
 
-variable "s3_bucket_arn" {
-  description = "ARN of the S3 bucket to connect to the SFTP server"
+variable "access_role" {
+  description = "ARN of the IAM role to attach to the SFTP connector"
   type        = string
 
   validation {
-    condition     = can(regex("^arn:aws:s3:::[a-z0-9.-]+$", var.s3_bucket_arn))
-    error_message = "S3 bucket ARN must be in the format: arn:aws:s3:::bucket-name"
+    condition     = can(regex("^arn:aws:iam::[0-9]{12}:role/.+$", var.access_role))
+    error_message = "Access role must be a valid IAM role ARN."
   }
+
 }
-
-
 
 variable "user_secret_id" {
   description = "ARN of the AWS Secrets Manager secret containing SFTP credentials (optional - will auto-detect for AWS Transfer Family servers)"
@@ -54,12 +53,6 @@ variable "security_policy_name" {
 
 variable "logging_role" {
   description = "IAM role ARN for CloudWatch logging (if not provided, a new role will be created)"
-  type        = string
-  default     = null
-}
-
-variable "S3_kms_key_arn" {
-  description = "ARN of the KMS key used for encryption (optional)"
   type        = string
   default     = null
 }
@@ -97,12 +90,6 @@ variable "sftp_private_key" {
 
 variable "secret_name" {
   description = "Name for the new secret (only used when create_secret is true)"
-  type        = string
-  default     = null
-}
-
-variable "secret_kms_key_id" {
-  description = "KMS key ID for encrypting the secret"
   type        = string
   default     = null
 }

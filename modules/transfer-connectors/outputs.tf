@@ -19,7 +19,7 @@ output "connector_url" {
 
 output "connector_role_arn" {
   description = "The ARN of the IAM role used by the connector"
-  value       = aws_iam_role.connector_role.arn
+  value       = var.access_role
 }
 
 output "connector_logging_role_arn" {

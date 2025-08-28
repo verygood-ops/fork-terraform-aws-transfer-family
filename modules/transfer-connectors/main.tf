@@ -1,11 +1,3 @@
-# Warning for empty trusted host keys
-check "trusted_host_keys_warning" {
-  assert {
-    condition = length(var.trusted_host_keys) >= 0
-    error_message = "WARNING: No trusted host keys provided. The connector will deploy but may require manual host key configuration for secure connections. You can add them after creating the connector by using the host key information returned by the TestConnection action."
-  }
-}
-
 #####################################################################################
 # AWS Transfer Family SFTP Connector Module
 # This module creates an AWS Transfer Family SFTP connector to connect an S3 bucket to an SFTP server
@@ -45,6 +37,14 @@ check "credentials_provided" {
   }
 }
 
+resource "terraform_data" "trusted_host_keys_warning" {
+  count = length(var.trusted_host_keys) == 0 ? 1 : 0
+  
+  provisioner "local-exec" {
+    command = "echo 'WARNING: No trusted host keys provided. The connector will deploy but may require manual host key configuration for secure connections.'"
+  }
+}
+
 #####################################################################################
 # Secrets Manager Secret (only when create_secret is true)
 #####################################################################################
@@ -53,7 +53,7 @@ resource "aws_secretsmanager_secret" "sftp_credentials" {
   count       = local.create_secret ? 1 : 0
   name        = var.secret_name
   description = "SFTP credentials for connector"
-  kms_key_id  = var.secret_kms_key_id
+  kms_key_id  = var.secrets_manager_kms_key_arn
 }
 
 resource "aws_secretsmanager_secret_rotation" "sftp_credentials_rotation" {
@@ -219,11 +219,10 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 resource "aws_transfer_connector" "sftp_connector" {
   depends_on = [
-    aws_iam_role_policy_attachment.connector_policy_attachment,
     aws_iam_role_policy_attachment.connector_logging_policy
   ]
   
-  access_role = aws_iam_role.connector_role.arn
+  access_role = var.access_role
   url         = local.sftp_url
 
   # SFTP config - always include secret, optionally include trusted host keys
@@ -341,7 +340,7 @@ resource "terraform_data" "discover_and_test_connector" {
           --connector-id ${aws_transfer_connector.sftp_connector.id} \
           --region ${data.aws_region.current.id} \
           --url "${local.sftp_url}" \
-          --access-role "${aws_iam_role.connector_role.arn}" \
+          --access-role "${var.access_role}" \
           --logging-role "${local.logging_role}" \
           --sftp-config "UserSecretId=${local.effective_secret_id},TrustedHostKeys=$HOST_KEY" \
           --output json)
@@ -374,89 +373,6 @@ resource "terraform_data" "discover_and_test_connector" {
 }
 
 #####################################################################################
-# IAM Role and Policy for the SFTP Connector
-#####################################################################################
-
-resource "aws_iam_role" "connector_role" {
-  name = "transfer-connector-role-${var.connector_name}"
-  
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "transfer.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = var.tags
-}
-
-# This policy is based off the example from the official AWS documentation https://docs.aws.amazon.com/transfer/latest/userguide/create-sftp-connector-procedure.html
-resource "aws_iam_policy" "connector_policy" {
-  name        = "transfer-connector-policy-${var.connector_name}"
-  description = "Policy for AWS Transfer Family SFTP connector"
-  
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = concat([
-      {
-        Sid = "AllowListingOfUserFolder",
-        Effect = "Allow"
-        Action = [
-          "s3:ListBucket",
-          "s3:GetBucketLocation"
-        ]
-        Resource = var.s3_bucket_arn
-      },
-      {
-        Sid = "HomeDirObjectAccess",
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:DeleteObject",
-          "s3:DeleteObjectVersion",
-          "s3:GetObjectVersion",
-          "s3:GetObjectACL",
-          "s3:PutObjectACL"
-        ]
-        Resource = "${var.s3_bucket_arn}/*"
-      },
-    ], local.effective_secret_id != null ? [{
-      Sid = "GetConnectorSecretValue",
-      Effect = "Allow"
-      Action = [
-        "secretsmanager:GetSecretValue"
-      ]
-      Resource = local.effective_secret_id
-    }] : [], var.secrets_manager_kms_key_arn != null ? [{
-      Effect = "Allow"
-      Action = [
-        "kms:Decrypt"
-      ]
-      Resource = var.secrets_manager_kms_key_arn
-    }] : [], var.S3_kms_key_arn != null ? [{
-      Effect = "Allow"
-      Action = [
-        "kms:Decrypt",
-        "kms:GenerateDataKey"
-      ]
-      Resource = var.S3_kms_key_arn
-    }] : [])
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "connector_policy_attachment" {
-  role       = aws_iam_role.connector_role.name
-  policy_arn = aws_iam_policy.connector_policy.arn
-}
-
-#####################################################################################
 # CloudWatch Logging Role and Policy (if not provided)
 #####################################################################################
 
@@ -485,4 +401,30 @@ resource "aws_iam_role_policy_attachment" "connector_logging_policy" {
   count      = var.logging_role == null ? 1 : 0
   role       = aws_iam_role.connector_logging_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
+}
+
+#####################################################################################
+# Optional IAM Policy Management for Access Role
+#####################################################################################
+
+# Policy for secrets manager access (when using existing secret)
+resource "aws_iam_role_policy" "access_role_secrets_policy" {
+  count = local.create_secret ? 1 : 0
+  
+  name = "transfer-connector-secrets-policy-${var.connector_name}"
+  role = var.access_role
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "GetConnectorSecretValue"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = var.user_secret_id
+      }
+    ]
+  })
 }
