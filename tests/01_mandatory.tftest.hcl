@@ -8,12 +8,14 @@ run "mandatory_plan_basic" {
     source = "./examples/sftp-public-endpoint-service-managed-S3"
   }
 }
+
 run "mandatory_apply_basic" {
   command = apply
   module {
     source = "./examples/sftp-public-endpoint-service-managed-S3"
   }
 }
+
 run "mandatory_plan_vpc" {
   command = plan
   module {
@@ -44,6 +46,7 @@ run "connector_file_send_plan" {
     existing_secret_arn = run.mandatory_apply_basic.test_user_secret.private_key_secret.arn
   }
 }
+
 run "connector_file_send_apply" {
   command = apply
   module {
