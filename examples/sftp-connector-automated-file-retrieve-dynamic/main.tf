@@ -235,7 +235,7 @@ resource "aws_lambda_code_signing_config" "lambda_code_signing" {
 ###################################################################
 resource "aws_lambda_function" "file_discovery" {
   #checkov:skip=CKV_AWS_117: "Lambda function does not require VPC configuration for this use case"
-  filename         = "index.zip"
+  filename         = data.archive_file.lambda_zip.output_path
   function_name    = "sftp-file-discovery-${random_pet.name.id}"
   role            = aws_iam_role.lambda_role.arn
   handler         = "index.lambda_handler"
@@ -524,7 +524,7 @@ resource "aws_lambda_function" "event_listener" {
   #checkov:skip=CKV_AWS_272: "Lambda function does not require code signing for this use case"
   #checkov:skip=CKV_AWS_116: "Lambda function does not require DLQ for this use case"
   #checkov:skip=CKV_AWS_117: "Lambda function does not require VPC configuration for this use case"
-  filename         = "event_listener.zip"
+  filename         = data.archive_file.event_listener_zip[0].output_path
   function_name    = "sftp-event-listener-${random_pet.name.id}"
   role            = aws_iam_role.event_listener_role[0].arn
   handler         = "event_listener.lambda_handler"
