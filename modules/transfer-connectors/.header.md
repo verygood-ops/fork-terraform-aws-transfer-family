@@ -31,9 +31,11 @@ module "transfer_connector" {
 
 ## Architecture
 
+### High-Level Architecture
+
 ![High-Level Architecture of SFTP connector deployment](https://github.com/aws-ia/terraform-aws-transfer-family/blob/main/images/TF_Connectors.png)
 
-High-Level Architecture of SFTP connector deployment using this Terraform module
+Figure 1: High-Level Architecture of SFTP connector deployment using this Terraform module
 
 ## Features
 
