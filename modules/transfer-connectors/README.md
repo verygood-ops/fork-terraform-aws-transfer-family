@@ -36,9 +36,9 @@ module "transfer_connector" {
 
 ### High-Level Architecture
 
-![Architecture using VPC Endpoints](https://github.com/aws-ia/terraform-aws-transfer-family/blob/dev/images/Transfer%20Family%20VPC%20endpoint.png)
+![High-Level Architecture of SFTP connector deployment](https://github.com/aws-ia/terraform-aws-transfer-family/blob/main/images/TF_Connectors.png)
 
-Figure 1: Architecture using VPC endpoints of the AWS Transfer Family deployment using this Terraform module
+Figure 1: High-Level Architecture of SFTP connector deployment using this Terraform module
 
 ## Features
 
