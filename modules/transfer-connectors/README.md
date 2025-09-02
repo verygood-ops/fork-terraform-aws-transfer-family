@@ -1,4 +1,184 @@
 <!-- BEGIN_TF_DOCS -->
+# AWS Transfer Family Connectors Terraform Module
+
+This module creates and configures AWS Transfer Family Connectors for automated file transfers to/from external SFTP servers.
+
+## Overview
+
+This module creates and configures AWS Transfer Connectors with the following features:
+
+- Automated file transfer to/from external SFTP servers
+- Support for scheduled file retrieval using EventBridge Scheduler
+- Secure credential management via AWS Secrets Manager
+- SSH host key validation and auto-discovery
+- Static IP addresses for outbound connections
+- Integration with S3 for file storage and KMS for encryption
+
+## Quick Start
+
+```hcl
+module "transfer_connector" {
+  source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
+
+  url           = "sftp://external-server.com"
+  s3_bucket_arn = "arn:aws:s3:::my-bucket"
+  sftp_username    = "sftp-user"
+  sftp_private_key = file("~/.ssh/id_rsa")
+
+  tags = {
+    Environment = "Dev"
+    Project     = "File Transfer"
+  }
+}
+```
+
+## Architecture
+
+### High-Level Architecture
+
+![Architecture using VPC Endpoints](https://github.com/aws-ia/terraform-aws-transfer-family/blob/dev/images/Transfer%20Family%20VPC%20endpoint.png)
+
+Figure 1: Architecture using VPC endpoints of the AWS Transfer Family deployment using this Terraform module
+
+## Features
+
+### Transfer Connectors
+
+- Automated file transfer to/from external SFTP servers
+- Support for scheduled file retrieval using EventBridge Scheduler
+- Secure credential management via AWS Secrets Manager
+- SSH host key validation and auto-discovery
+- Static IP addresses for outbound connections
+- Integration with S3 for file storage and KMS for encryption
+
+### Security Features
+
+- SSH host key validation for secure connections
+- Auto-discovery of SSH host keys when not provided
+- Secure credential storage in AWS Secrets Manager
+- Support for private key authentication
+- Connector-specific security policies
+
+### Automation Features
+
+- EventBridge Scheduler integration for automated file retrieval
+- Configurable scheduling for regular file transfers
+- Post-deployment connectivity testing
+- Integration with AWS CLI for validation
+
+## Security Policy Support
+
+Supports AWS Transfer connector security policies including:
+
+- TransferSFTPConnectorSecurityPolicy-2024-03 (default)
+- Other connector-specific security policies
+
+## Validation Checks
+
+The module includes several built-in checks to ensure proper configuration:
+
+- SSH host key validation
+- Credential configuration verification
+- S3 bucket ARN validation
+- Security policy compatibility checks
+
+## Best Practices
+
+- Use SSH host key validation for secure connections
+- Store credentials securely in AWS Secrets Manager
+- Enable post-deployment testing for connectivity validation
+- Use proper tagging for resources
+- Configure appropriate security policies for your use case
+
+## Installation
+
+To use this module in your Terraform configuration:
+
+1. Reference the module in your Terraform code:
+
+```hcl
+module "transfer_connector" {
+  source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
+
+  # Required parameters
+  url           = "sftp://external-server.com"
+  s3_bucket_arn = "arn:aws:s3:::my-bucket"
+
+  # Authentication
+  sftp_username    = "sftp-user"
+  sftp_private_key = file("~/.ssh/id_rsa")
+
+  # Optional parameters
+  trusted_host_keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAA..."]
+  tags = {
+    Environment = "Production"
+    Project     = "File Transfer"
+  }
+}
+```
+
+2. Initialize your Terraform workspace:
+
+```bash
+terraform init
+```
+
+3. Review the planned changes:
+
+```bash
+terraform plan
+```
+
+4. Apply the configuration:
+
+```bash
+terraform apply
+```
+
+## Basic Usage
+
+### SFTP Connector with Automated File Retrieval
+
+```hcl
+module "sftp_connector" {
+  source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
+
+  # Required parameters
+  url           = "sftp://external-server.com"
+  s3_bucket_arn = aws_s3_bucket.files.arn
+
+  # Authentication
+  sftp_username    = "sftp-user"
+  sftp_private_key = file("~/.ssh/id_rsa")
+
+  # Security - SSH host keys for validation
+  trusted_host_keys = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAA..."
+  ]
+
+  # Optional features
+  test_connector_post_deployment = true
+
+  tags = {
+    Environment = "Demo"
+    Project     = "File Transfer"
+  }
+}
+```
+
+## Key Configuration Attributes
+
+When using Transfer Connectors, pay attention to these critical attributes:
+
+- **`url`**: SFTP server endpoint (required) - automatically adds `sftp://` prefix if not provided
+- **`s3_bucket_arn`**: Target S3 bucket ARN for file storage (required)
+- **`trusted_host_keys`**: SSH host keys for server validation - leave empty for auto-discovery
+- **`sftp_username`** and **`sftp_private_key`**: Authentication credentials
+- **`user_secret_id`**: Alternative to providing credentials directly - use existing Secrets Manager secret
+- **`security_policy_name`**: Must use connector-specific policies (default: `TransferSFTPConnectorSecurityPolicy-2024-03`)
+- **`test_connector_post_deployment`**: Enable to validate connectivity after deployment - requires AWS CLI installation and checks for specific version compatibility. Will warn but not fail deployment if conditions aren't met.
+- **`enable_dynamodb_tracking`**: Enable DynamoDB tracking for file transfer operations
+
 ## Requirements
 
 | Name | Version |
