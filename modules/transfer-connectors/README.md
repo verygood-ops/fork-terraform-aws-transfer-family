@@ -27,14 +27,12 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [aws_iam_policy.connector_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.connector_logging_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.connector_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.rotation_lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.access_role_secrets_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.lambda_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.connector_logging_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.connector_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.rotation_lambda_basic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lambda_function.rotation_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_permission.allow_secretsmanager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
@@ -44,6 +42,7 @@ No modules.
 | [aws_transfer_connector.sftp_connector](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/transfer_connector) | resource |
 | [random_id.connector_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [terraform_data.discover_and_test_connector](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.trusted_host_keys_warning](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.rotation_lambda_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
@@ -53,12 +52,10 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_s3_bucket_arn"></a> [s3\_bucket\_arn](#input\_s3\_bucket\_arn) | ARN of the S3 bucket to connect to the SFTP server | `string` | n/a | yes |
+| <a name="input_access_role"></a> [access\_role](#input\_access\_role) | ARN of the IAM role to attach to the SFTP connector | `string` | n/a | yes |
 | <a name="input_url"></a> [url](#input\_url) | URL of the SFTP server to connect to (e.g., example.com or sftp://example.com:22) | `string` | n/a | yes |
-| <a name="input_S3_kms_key_arn"></a> [S3\_kms\_key\_arn](#input\_S3\_kms\_key\_arn) | ARN of the KMS key used for encryption (optional) | `string` | `null` | no |
 | <a name="input_connector_name"></a> [connector\_name](#input\_connector\_name) | Name of the AWS Transfer Family connector | `string` | `"sftp-connector"` | no |
 | <a name="input_logging_role"></a> [logging\_role](#input\_logging\_role) | IAM role ARN for CloudWatch logging (if not provided, a new role will be created) | `string` | `null` | no |
-| <a name="input_secret_kms_key_id"></a> [secret\_kms\_key\_id](#input\_secret\_kms\_key\_id) | KMS key ID for encrypting the secret | `string` | `null` | no |
 | <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name) | Name for the new secret (only used when create\_secret is true) | `string` | `null` | no |
 | <a name="input_secrets_manager_kms_key_arn"></a> [secrets\_manager\_kms\_key\_arn](#input\_secrets\_manager\_kms\_key\_arn) | ARN of the KMS key used to encrypt the secrets manager secret containing SFTP credentials | `string` | `null` | no |
 | <a name="input_security_policy_name"></a> [security\_policy\_name](#input\_security\_policy\_name) | The name of the security policy to use for the connector (must be in the format TransferSFTPConnectorSecurityPolicy-*) | `string` | `"TransferSFTPConnectorSecurityPolicy-2024-03"` | no |

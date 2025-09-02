@@ -23,13 +23,120 @@ data "aws_region" "current" {}
 locals {
   connector_name = "retrieve-${random_pet.name.id}"
   create_secret = var.existing_secret_arn == null
-  kms_key_arn = local.create_secret ? aws_kms_key.transfer_family_key[0].arn : data.aws_secretsmanager_secret.existing[0].kms_key_id
+  kms_key_arn = local.create_secret ? aws_kms_key.transfer_family_key[0].arn : data.aws_kms_key.existing[0].arn
 }
 
 # Get KMS key from existing secret if provided
 data "aws_secretsmanager_secret" "existing" {
   count = local.create_secret ? 0 : 1
   arn   = var.existing_secret_arn
+}
+
+# Get KMS key details from existing secret
+data "aws_kms_key" "existing" {
+  count  = local.create_secret ? 0 : 1
+  key_id = data.aws_secretsmanager_secret.existing[0].kms_key_id
+}
+
+###################################################################
+# SFTP Connector
+###################################################################
+module "sftp_connector" {
+  source = "../../modules/transfer-connectors"
+
+  connector_name                 = local.connector_name
+  url                            = var.sftp_server_endpoint
+  access_role                    = aws_iam_role.connector_role.arn
+
+  # Use existing secret
+  user_secret_id                 = var.existing_secret_arn
+  secret_name                    = local.create_secret ? "sftp-credentials-${random_pet.name.id}" : null
+  sftp_username                  = var.sftp_username
+  sftp_private_key               = var.sftp_private_key
+  trusted_host_keys              = var.trusted_host_keys
+  secrets_manager_kms_key_arn    = local.kms_key_arn
+  security_policy_name           = "TransferSFTPConnectorSecurityPolicy-2024-03"
+  test_connector_post_deployment = var.test_connector_post_deployment
+
+  tags = {
+    Environment = "Demo"
+    Project     = "SFTP Connector Retrieve Dynamic"
+  }
+}
+
+#####################################################################################
+# IAM Role and Policy for the SFTP Connector
+#####################################################################################
+
+resource "aws_iam_role" "connector_role" {
+  name = "transfer-connector-role-${local.connector_name}"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "transfer.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# This policy is based off the example from the official AWS documentation https://docs.aws.amazon.com/transfer/latest/userguide/create-sftp-connector-procedure.html
+resource "aws_iam_policy" "connector_policy" {
+  name        = "transfer-connector-policy-${local.connector_name}"
+  description = "Policy for AWS Transfer Family SFTP connector"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat([
+      {
+        Sid = "AllowListingOfUserFolder",
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = module.retrieve_s3_bucket.s3_bucket_arn
+      },
+      {
+        Sid = "HomeDirObjectAccess",
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:GetObjectVersion",
+          "s3:GetObjectACL",
+          "s3:PutObjectACL"
+        ]
+        Resource = "${module.retrieve_s3_bucket.s3_bucket_arn}/*"
+      },
+    ], local.create_secret ? [] : [{
+      Sid = "GetConnectorSecretValue",
+      Effect = "Allow"
+      Action = [
+        "secretsmanager:GetSecretValue"
+      ]
+      Resource = var.existing_secret_arn
+    }], local.kms_key_arn != null ? [{
+      Effect = "Allow"
+      Action = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      Resource = local.kms_key_arn
+    }] : [])
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "connector_policy_attachment" {
+  role       = aws_iam_role.connector_role.name
+  policy_arn = aws_iam_policy.connector_policy.arn
 }
 
 ###################################################################
@@ -178,35 +285,6 @@ module "retrieve_s3_bucket" {
         sse_algorithm     = "aws:kms"
       }
     }
-  }
-}
-
-###################################################################
-# SFTP Connector
-###################################################################
-module "sftp_connector" {
-  source = "../../modules/transfer-connectors"
-
-  connector_name = local.connector_name
-  url            = var.sftp_server_endpoint
-  s3_bucket_arn  = module.retrieve_s3_bucket.s3_bucket_arn
-
-  # Use existing secret
-  user_secret_id   = var.existing_secret_arn
-  secret_name      = local.create_secret ? "sftp-credentials-${random_pet.name.id}" : null
-  secret_kms_key_id = local.create_secret ? aws_kms_key.transfer_family_key[0].arn : null
-  sftp_username    = var.sftp_username
-  sftp_private_key = var.sftp_private_key
-  trusted_host_keys = var.trusted_host_keys
-
-  S3_kms_key_arn   = local.kms_key_arn
-  secrets_manager_kms_key_arn = local.kms_key_arn
-  security_policy_name = "TransferSFTPConnectorSecurityPolicy-2024-03"
-  test_connector_post_deployment = var.test_connector_post_deployment
-
-  tags = {
-    Environment = "Demo"
-    Project     = "SFTP Connector Retrieve Dynamic"
   }
 }
 
