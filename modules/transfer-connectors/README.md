@@ -18,7 +18,6 @@ module "transfer_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   url           = "sftp://external-server.com"
-  s3_bucket_arn = "arn:aws:s3:::my-bucket"
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
@@ -84,7 +83,6 @@ module "transfer_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   url           = "sftp://external-server.com"
-  s3_bucket_arn = "arn:aws:s3:::my-bucket"
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
@@ -122,7 +120,6 @@ module "sftp_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   url           = "sftp://external-server.com"
-  s3_bucket_arn = aws_s3_bucket.files.arn
 
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
