@@ -179,7 +179,7 @@ module "transfer_connectors" {
 
   # Required parameters
   url            = "sftp://external-server.com"
-  s3_bucket_arn  = "arn:aws:s3:::my-bucket"
+  access_role    = "arn:aws:iam::123456789012:role/transfer-connector-role"
 
   # Optional parameters
   sftp_username  = "sftp-user"
@@ -242,7 +242,7 @@ module "sftp_connector" {
 
   # Required parameters
   url           = "sftp://external-server.com"
-  s3_bucket_arn = aws_s3_bucket.files.arn
+  access_role   = aws_iam_role.transfer_connector_role.arn
 
   # Authentication
   sftp_username    = "sftp-user"
@@ -293,7 +293,7 @@ Key points about VPC endpoint types:
 When using Transfer Connectors, pay attention to these critical attributes:
 
 - **`url`**: SFTP server endpoint (required) - automatically adds `sftp://` prefix if not provided
-- **`s3_bucket_arn`**: Target S3 bucket ARN for file storage (required)
+- **`access_role`**: IAM role ARN that the connector assumes for S3 and other AWS service access (required)
 - **`trusted_host_keys`**: SSH host keys for server validation - leave empty for auto-discovery
 - **`sftp_username`** and **`sftp_private_key`**: Authentication credentials
 - **`user_secret_id`**: Alternative to providing credentials directly - use existing Secrets Manager secret
