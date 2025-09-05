@@ -11,13 +11,17 @@ This module creates and configures an SFTP connector with the following features
 - Automated discovery of Host Keys of the remote server (Optional), used to verify server identity at each connection
 - CloudWatch logging configuration
 
+**Note**: You must provide an `access_role` ARN - an IAM role that the connector assumes to access S3 and other AWS services. This module does not create the IAM role for you.
+
 ## Quick Start
 
 ```hcl
 module "transfer_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
-  url           = "sftp://external-server.com"
+  url         = "sftp://external-server.com"
+  access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
+  
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
@@ -61,7 +65,7 @@ Figure 1: High-Level Architecture of SFTP connector deployment using this Terraf
 
 - SSH host key validation
 - Credential configuration verification
-- S3 bucket ARN validation
+- IAM access role validation
 - Security policy compatibility checks
 
 ## Best Practices
@@ -82,7 +86,9 @@ To use this module in your Terraform configuration:
 module "transfer_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
-  url           = "sftp://external-server.com"
+  url         = "sftp://external-server.com"
+  access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
+  
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
@@ -119,7 +125,8 @@ terraform apply
 module "sftp_connector" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
-  url           = "sftp://external-server.com"
+  url         = "sftp://external-server.com"
+  access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
 
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
