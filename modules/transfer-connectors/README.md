@@ -21,7 +21,6 @@ module "transfer_connector" {
 
   url         = "sftp://external-server.com"
   access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
-  
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
@@ -88,7 +87,6 @@ module "transfer_connector" {
 
   url         = "sftp://external-server.com"
   access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
-  
   sftp_username    = "sftp-user"
   sftp_private_key = file("~/.ssh/id_rsa")
 
