@@ -16,7 +16,7 @@ This module creates and configures an SFTP connector with the following features
 ## Quick Start
 
 ```hcl
-module "transfer_connector" {
+module "transfer_connectors" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   url         = "sftp://external-server.com"

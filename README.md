@@ -179,6 +179,7 @@ module "transfer_connectors" {
 
   # Required parameters
   url            = "sftp://external-server.com"
+  access_role = "arn:aws:iam::123456789012:role/transfer-connector-role"
 
   # Optional parameters
   sftp_username  = "sftp-user"
