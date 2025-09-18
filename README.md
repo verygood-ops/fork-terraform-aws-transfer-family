@@ -236,7 +236,7 @@ module "transfer_server" {
 ### SFTP Connector with Automated File Retrieval
 
 ```hcl
-module "sftp_connector" {
+module "transfer-connectors" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   # Required parameters

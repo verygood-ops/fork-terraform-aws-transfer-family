@@ -120,7 +120,7 @@ terraform apply
 ### SFTP connector setup
 
 ```hcl
-module "sftp_connector" {
+module "transfer-connectors" {
   source = "aws-ia/transfer-family/aws//modules/transfer-connectors"
 
   url         = "sftp://external-server.com"
