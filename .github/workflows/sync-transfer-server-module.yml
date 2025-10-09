@@ -1,4 +1,6 @@
 name: Sync Transfer Server Module
+permissions:
+  contents: write
 
 on:
   pull_request:
