@@ -165,7 +165,6 @@ module "transfer-connectors" {
 | <a name="provider_archive"></a> [archive](#provider\_archive) | >= 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.95.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | >= 2.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | >= 3.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -189,7 +188,6 @@ No modules.
 | [aws_secretsmanager_secret_rotation.sftp_credentials_rotation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_rotation) | resource |
 | [aws_secretsmanager_secret_version.sftp_credentials](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_transfer_connector.sftp_connector](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/transfer_connector) | resource |
-| [random_id.connector_id](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [terraform_data.discover_and_test_connector](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.trusted_host_keys_warning](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.rotation_lambda_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
